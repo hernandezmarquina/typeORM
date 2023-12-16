@@ -19,7 +19,7 @@ export class Recipe {
   preparationTime: number;
 
   @Column()
-  preparation: number;
+  preparation: string;
 
   @OneToMany(() => RecipeIngredient, rI => rI.recipe)
   ingredients: RecipeIngredient[];

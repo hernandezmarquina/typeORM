@@ -5,7 +5,7 @@
  * @format
  */
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
@@ -24,6 +24,8 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import useDatabase from './src/hooks/useDatabase';
+import {AppDataSource} from './src/database';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -56,7 +58,19 @@ function Section({children, title}: SectionProps): JSX.Element {
 }
 
 function App(): JSX.Element {
+  const {getRecipes, recipes} = useDatabase();
   const isDarkMode = useColorScheme() === 'dark';
+
+  useEffect(() => {
+    AppDataSource.initialize()
+      .then(() => {
+        console.log('Data Source has been initialized!');
+        getRecipes();
+      })
+      .catch(err => {
+        console.error('Error during Data Source initialization', err);
+      });
+  }, []);
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
