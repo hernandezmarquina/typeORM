@@ -7,6 +7,7 @@ const AppDataSource = new DataSource({
   type: 'react-native',
   database: 'recipesdb',
   location: 'default',
+  logging: ['error'],
   entities: [Recipe, Ingredient, RecipeIngredient],
   synchronize: true,
 });
