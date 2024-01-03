@@ -21,6 +21,9 @@ export class Recipe {
   @Column()
   preparation: string;
 
+  @Column()
+  image: string;
+
   @OneToMany(() => RecipeIngredient, rI => rI.recipe)
   ingredients: RecipeIngredient[];
 }

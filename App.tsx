@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {SafeAreaView, StatusBar, Text} from 'react-native';
+import {SafeAreaView, StatusBar, StyleSheet, Text} from 'react-native';
 import {AppDataSource} from './src/database';
 import {NavigationContainer} from '@react-navigation/native';
 import AppStack from './src/screens';
@@ -19,8 +19,8 @@ const App = () => {
   }, []);
 
   return (
-    <SafeAreaView>
-      <StatusBar barStyle={'light-content'} />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle={'dark-content'} />
       {loading ? (
         <Text>Cargando...</Text>
       ) : (
@@ -31,5 +31,12 @@ const App = () => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+});
 
 export default App;
