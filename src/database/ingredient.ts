@@ -10,7 +10,7 @@ export class Ingredient {
   name: string;
 
   @Column()
-  unit: number;
+  unit: string;
 
   @OneToMany(() => RecipeIngredient, rI => rI.ingredient)
   recipes: RecipeIngredient[];

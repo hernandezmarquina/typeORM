@@ -4,11 +4,14 @@ import {StyleSheet, Text, TouchableOpacity} from 'react-native';
 interface IButtonProps {
   onPress: () => void;
   title: string;
+  danger?: boolean;
 }
 
 const Button = (props: IButtonProps) => {
   return (
-    <TouchableOpacity style={styles.button} onPress={props.onPress}>
+    <TouchableOpacity
+      style={[styles.button, {backgroundColor: props.danger ? 'red' : 'blue'}]}
+      onPress={props.onPress}>
       <Text style={styles.title}>{props.title}</Text>
     </TouchableOpacity>
   );
@@ -16,7 +19,6 @@ const Button = (props: IButtonProps) => {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: 'blue',
     padding: 16,
     tintColor: 'white',
     borderRadius: 4,
@@ -27,6 +29,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+    paddingHorizontal: 16,
   },
 });
 

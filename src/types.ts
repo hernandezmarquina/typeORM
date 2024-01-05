@@ -1,10 +1,10 @@
 export enum Unit {
-  kilogramos,
-  gramos,
-  litros,
-  mililitros,
-  piezas,
-  tazas,
-  cucharada,
-  pizca,
+  kilogramos = 'kilogramos',
+  gramos = 'gramos',
+  litros = 'litros',
+  mililitros = 'mililitros',
+  piezas = 'piezas',
+  tazas = 'tazas',
+  cucharada = 'cucharada',
+  pizca = 'pizca',
 }

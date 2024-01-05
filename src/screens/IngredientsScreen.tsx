@@ -13,18 +13,19 @@ import {Ingredient} from '../database/ingredient';
 import {Unit} from '../types';
 import Button from '../components/Button';
 import {useNavigation} from '@react-navigation/native';
-import DropDownPicker from 'react-native-dropdown-picker';
+import RNPickerSelect from 'react-native-picker-select';
+import {AppDataSource} from '../database';
 
-const pickerItems = Object.keys(Unit).map(k => ({
-  label: Unit[k],
-  value: k,
-}));
+const pickerItems: {label: string; value: string}[] = Object.keys(Unit)
+  .filter(key => !Number.isInteger(key))
+  .map(k => ({
+    label: Unit[k],
+    value: k,
+  }));
 
 const IngredientsScreen = () => {
   const navigator = useNavigation();
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [units, setUnits] =
-    useState<{label: string; value: string}[]>(pickerItems);
   const [search, setSearch] = useState<string>('');
 
   const [itemSelected, setItemSelected] = useState<Ingredient | undefined>();
@@ -38,82 +39,131 @@ const IngredientsScreen = () => {
     {name: string; unit: Unit} | undefined
   >();
 
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
-
   useEffect(() => {
-    setIngredients([
-      {
-        id: 1,
-        name: 'Harina de avena',
-        unit: Unit.gramos,
-        recipes: [],
-      },
-      {
-        id: 2,
-        name: 'Platano',
-        unit: Unit.piezas,
-        recipes: [],
-      },
-      {
-        id: 3,
-        name: 'Canela',
-        unit: Unit.gramos,
-        recipes: [],
-      },
-      {
-        id: 4,
-        name: 'Vainilla',
-        unit: Unit.cucharada,
-        recipes: [],
-      },
-      {
-        id: 5,
-        name: 'Sal',
-        unit: Unit.pizca,
-        recipes: [],
-      },
-      {
-        id: 6,
-        name: 'Huevo',
-        unit: Unit.piezas,
-        recipes: [],
-      },
-    ]);
+    const repository = AppDataSource.getRepository(Ingredient);
+    repository.find().then(r => {
+      setIngredients(r);
+    });
   }, []);
+
+  const addIngredient = ({
+    name,
+    unit,
+    amount,
+  }: {
+    name: string;
+    unit: string;
+    amount: number;
+  }) => {
+    const repository = AppDataSource.getRepository(Ingredient);
+    repository.save({name, unit, amount}).then(r => {
+      setIngredients([...ingredients, r]);
+      setItemSelected(undefined);
+      setAmount(0);
+      navigator.navigate(
+        'Nueva Receta',
+        {ingredient: r, amount: amount},
+        {merge: true},
+      );
+    });
+  };
 
   return (
     <View style={appStyles.container}>
-      <TextInput
-        onChangeText={v => {}}
-        style={appStyles.input}
-        placeholder="Buscar ingrediente"
-        keyboardType="default"
-      />
-      <TouchableOpacity
-        style={styles.addIngredient}
-        onPress={() => {
-          setNewIngredientModalVisible(true);
-        }}>
-        <Text style={styles.addIngredientText}>
-          + Agregar nuevo ingrediente
-        </Text>
-      </TouchableOpacity>
-      <ScrollView>
-        {ingredients.map(ingredient => (
-          <View style={styles.itemContainer} key={ingredient.id}>
-            <Text style={appStyles.itemText}>{ingredient.name}</Text>
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={() => {
-                setItemSelected(ingredient);
-                setAmountModalVisible(true);
-              }}>
-              <Text style={styles.addButtonText}>agregar</Text>
-            </TouchableOpacity>
+      {newIngredientModalVisible ? (
+        <View>
+          <TextInput
+            onChangeText={v => {
+              setNewIngredient({...newIngredient, name: v});
+            }}
+            style={appStyles.input}
+            placeholder={'Nombre del nuevo ingrediente...'}
+            keyboardType="default"
+          />
+          <View style={styles.row}>
+            <Text style={appStyles.label}>Cantidad: </Text>
+            <TextInput
+              onChangeText={v => setAmount(parseInt(v, 10))}
+              style={[appStyles.input, {flex: 1}]}
+              placeholder={'0'}
+              keyboardType="numeric"
+            />
+            <View style={[appStyles.label, {flex: 7, marginLeft: 4}]}>
+              <RNPickerSelect
+                placeholder={{
+                  label: 'Selecciona una opción',
+                  value: null,
+                }}
+                onValueChange={value => {
+                  setNewIngredient({...newIngredient, unit: value});
+                }}
+                items={pickerItems}
+                style={{
+                  inputIOS: {
+                    fontSize: 16,
+                  },
+                }}
+                value={newIngredient?.unit}
+              />
+            </View>
           </View>
-        ))}
-      </ScrollView>
+          <View style={[styles.row, {justifyContent: 'space-around'}]}>
+            <Button
+              danger
+              title="Cancelar"
+              onPress={() => {
+                setNewIngredientModalVisible(false);
+              }}
+            />
+            <Button
+              title="Agregar"
+              onPress={() => {
+                if (newIngredient?.name && newIngredient?.unit && amount > 0) {
+                  addIngredient({
+                    name: newIngredient.name,
+                    unit: newIngredient.unit,
+                    amount,
+                  });
+                  setNewIngredientModalVisible(false);
+                }
+              }}
+            />
+          </View>
+        </View>
+      ) : (
+        <>
+          <TextInput
+            onChangeText={v => {}}
+            style={appStyles.input}
+            placeholder="Buscar ingrediente"
+            keyboardType="default"
+          />
+          <TouchableOpacity
+            style={styles.addIngredient}
+            onPress={() => {
+              setNewIngredientModalVisible(true);
+            }}>
+            <Text style={styles.addIngredientText}>
+              + Agregar nuevo ingrediente
+            </Text>
+          </TouchableOpacity>
+          <ScrollView>
+            {ingredients.map(ingredient => (
+              <View style={styles.itemContainer} key={ingredient.id}>
+                <Text style={appStyles.itemText}>{ingredient.name}</Text>
+                <TouchableOpacity
+                  style={styles.addButton}
+                  onPress={() => {
+                    setItemSelected(ingredient);
+                    setAmountModalVisible(true);
+                  }}>
+                  <Text style={styles.addButtonText}>agregar</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
+        </>
+      )}
       <Modal visible={amountModalVisible} animationType="slide" transparent>
         <View style={styles.modalView}>
           <View style={styles.modalContainer}>
@@ -121,7 +171,7 @@ const IngredientsScreen = () => {
               <Text style={appStyles.label}>{itemSelected?.name}</Text>
               <TextInput
                 onChangeText={v => setAmount(parseInt(v, 10))}
-                style={appStyles.input}
+                style={[appStyles.input, {width: 100}]}
                 placeholder={`Cantidad en ${Unit[itemSelected?.unit]}`}
                 keyboardType="numeric"
               />
@@ -133,59 +183,6 @@ const IngredientsScreen = () => {
                 setAmountModalVisible(false);
                 setTimeout(() => {
                   setItemSelected(undefined);
-                  navigator.navigate(
-                    'Nueva Receta',
-                    {ingredient: item, amount: amount},
-                    {merge: true},
-                  );
-                }, 200);
-              }}
-            />
-          </View>
-        </View>
-      </Modal>
-      <Modal
-        visible={newIngredientModalVisible}
-        animationType="slide"
-        transparent>
-        <View style={styles.modalView}>
-          <View style={styles.modalContainer}>
-            <View style={styles.row}>
-              <Text style={appStyles.label}>Nombre: </Text>
-              <TextInput
-                onChangeText={v => {
-                  setNewIngredient({...newIngredient, name: v});
-                }}
-                style={[appStyles.input, {flex: 1}]}
-                placeholder={'Nombre ejemplo...'}
-                keyboardType="default"
-              />
-            </View>
-            <View style={styles.row}>
-              <TextInput
-                onChangeText={v => setAmount(parseInt(v, 10))}
-                style={[appStyles.input, {flex: 1}]}
-                placeholder={'0'}
-                keyboardType="numeric"
-              />
-              <View style={[appStyles.label, {flex: 7, marginLeft: 4}]}>
-                <DropDownPicker
-                  open={open}
-                  value={value}
-                  items={units}
-                  setOpen={setOpen}
-                  setValue={setValue}
-                  setItems={setUnits}
-                  placeholder={'Unidad de medida'}
-                />
-              </View>
-            </View>
-            <Button
-              title="Agregar"
-              onPress={() => {
-                const item = {...itemSelected};
-                setItemSelected(undefined);
-                setTimeout(() => {
                   navigator.navigate(
                     'Nueva Receta',
                     {ingredient: item, amount: amount},

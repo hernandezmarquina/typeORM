@@ -56,7 +56,6 @@ const CreateRecipeScreen = () => {
   const saveIngredients = () => {};
 
   useEffect(() => {
-    console.log('Ingredients: ', route.params);
     if (route.params?.ingredient) {
       setIngredients([
         ...ingredients,
