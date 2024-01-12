@@ -23,6 +23,12 @@ const pickerItems: {label: string; value: string}[] = Object.keys(Unit)
     value: k,
   }));
 
+interface IAddIngredientParams {
+  name: string;
+  unit: string;
+  amount: number;
+}
+
 const IngredientsScreen = () => {
   const navigator = useNavigation();
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -46,26 +52,17 @@ const IngredientsScreen = () => {
     });
   }, []);
 
-  const addIngredient = ({
-    name,
-    unit,
-    amount,
-  }: {
-    name: string;
-    unit: string;
-    amount: number;
-  }) => {
+  const addIngredient = async ({name, unit, amount}: IAddIngredientParams) => {
     const repository = AppDataSource.getRepository(Ingredient);
-    repository.save({name, unit, amount}).then(r => {
-      setIngredients([...ingredients, r]);
-      setItemSelected(undefined);
-      setAmount(0);
-      navigator.navigate(
-        'Nueva Receta',
-        {ingredient: r, amount: amount},
-        {merge: true},
-      );
-    });
+    const nI = await repository.save({name, unit, amount});
+    setIngredients([...ingredients, nI]);
+    setItemSelected(undefined);
+    setAmount(0);
+    navigator.navigate(
+      'Nueva Receta',
+      {ingredient: nI, amount: amount},
+      {merge: true},
+    );
   };
 
   return (

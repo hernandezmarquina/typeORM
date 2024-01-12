@@ -11,7 +11,7 @@ const AppStack = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Recetas" component={RecipesScreen} />
-      <Stack.Screen name="Detalles" component={RecipeDetailsScreen} />
+      <Stack.Screen name="Receta" component={RecipeDetailsScreen} />
       <Stack.Screen name="Ingredientes" component={IngredientsScreen} />
       <Stack.Screen name="Nueva Receta" component={CreateRecipeScreen} />
     </Stack.Navigator>

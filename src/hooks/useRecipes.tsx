@@ -10,7 +10,6 @@ const useDatabase = () => {
     recipeR
       .find()
       .then(r => {
-        console.log('recipes find', r);
         setRecipes(r);
       })
       .catch(e => {

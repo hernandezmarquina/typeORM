@@ -22,7 +22,7 @@ export class Recipe {
   preparation: string;
 
   @Column()
-  image: string;
+  image: number;
 
   @OneToMany(() => RecipeIngredient, rI => rI.recipe)
   ingredients: RecipeIngredient[];
