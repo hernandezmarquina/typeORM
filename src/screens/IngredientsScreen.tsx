@@ -32,7 +32,6 @@ interface IAddIngredientParams {
 const IngredientsScreen = () => {
   const navigator = useNavigation();
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [search, setSearch] = useState<string>('');
 
   const [itemSelected, setItemSelected] = useState<Ingredient | undefined>();
   const [amountModalVisible, setAmountModalVisible] = useState(false);
@@ -129,12 +128,6 @@ const IngredientsScreen = () => {
         </View>
       ) : (
         <>
-          <TextInput
-            onChangeText={v => {}}
-            style={appStyles.input}
-            placeholder="Buscar ingrediente"
-            keyboardType="default"
-          />
           <TouchableOpacity
             style={styles.addIngredient}
             onPress={() => {

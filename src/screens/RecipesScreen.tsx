@@ -1,11 +1,20 @@
 import React, {useEffect, useState} from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {Recipe} from '../database/recipe';
 import {AppDataSource} from '../database';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import appStyles from '../styles';
 import {recipeIcons} from '../images';
 import AddButton from '../components/AddButton';
+import {ScrollView} from 'react-native-gesture-handler';
+import {Like} from 'typeorm';
 
 const RecipesScreen = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -29,31 +38,70 @@ const RecipesScreen = () => {
     navigator.navigate('Receta', {recipeId: recipe.id});
   };
 
+  const onSearch = (v: string) => {
+    if (v.length === 0) {
+      getRecipes();
+      return;
+    }
+    const repository = AppDataSource.getRepository(Recipe);
+    repository
+      .find({
+        relations: {
+          ingredients: {
+            ingredient: true,
+          },
+        },
+        where: [
+          {
+            title: Like(`%${v}%`),
+          },
+          {
+            ingredients: {
+              ingredient: {
+                name: Like(`%${v}%`),
+              },
+            },
+          },
+        ],
+      })
+      .then(r => {
+        setRecipes(r);
+      });
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={appStyles.container}>
       <AddButton />
-      {recipes.map(r => (
-        <TouchableOpacity
-          key={r.id}
-          style={styles.recipe}
-          onPress={() => onRecipeSelected(r)}>
-          <Image style={styles.icon} source={recipeIcons[r.image]} />
-          <View style={styles.textContainer}>
-            <Text style={appStyles.label}>{r.title}</Text>
-            <Text style={appStyles.itemText}>
-              Tiempo de preparación: {r.preparationTime}min
-            </Text>
-            <View style={styles.itemsContainer}>
+      <ScrollView style={appStyles.scrollContainer}>
+        <TextInput
+          onChangeText={onSearch}
+          style={appStyles.input}
+          placeholder="Buscar receta por nombre o ingrediente"
+          keyboardType="default"
+        />
+        {recipes.map(r => (
+          <TouchableOpacity
+            key={r.id}
+            style={styles.recipe}
+            onPress={() => onRecipeSelected(r)}>
+            <Image style={styles.icon} source={recipeIcons[r.image]} />
+            <View style={styles.textContainer}>
+              <Text style={appStyles.label}>{r.title}</Text>
               <Text style={appStyles.itemText}>
-                Dificultad: {r.difficulty}/5
+                Tiempo de preparación: {r.preparationTime}min
               </Text>
-              <Text style={appStyles.itemText}>
-                {r.preparationTime} porciones
-              </Text>
+              <View style={styles.itemsContainer}>
+                <Text style={appStyles.itemText}>
+                  Dificultad: {r.difficulty}/5
+                </Text>
+                <Text style={appStyles.itemText}>
+                  {r.preparationTime} porciones
+                </Text>
+              </View>
             </View>
-          </View>
-        </TouchableOpacity>
-      ))}
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
     </View>
   );
 };
