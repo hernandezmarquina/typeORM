@@ -39,6 +39,11 @@ const appStyles = StyleSheet.create({
     fontSize: 14,
     marginVertical: 2,
   },
+  smallText: {
+    fontSize: 10,
+    marginLeft: 8,
+    color: 'red',
+  },
 });
 
 export default appStyles;

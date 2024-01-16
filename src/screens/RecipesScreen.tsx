@@ -15,6 +15,7 @@ import {recipeIcons} from '../images';
 import AddButton from '../components/AddButton';
 import {ScrollView} from 'react-native-gesture-handler';
 import {Like} from 'typeorm';
+import {RecipeIngredient} from '../database/recipeIngredient';
 
 const RecipesScreen = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -31,7 +32,21 @@ const RecipesScreen = () => {
   const getRecipes = async () => {
     const repository = AppDataSource.getRepository(Recipe);
     const dbRecipes = await repository.find();
-    setRecipes(dbRecipes);
+    setRecipes([...dbRecipes]);
+
+    const r = AppDataSource.getRepository(RecipeIngredient);
+    const rI = await r.find({
+      relations: {
+        ingredient: true,
+        recipe: true,
+      },
+    });
+    rI.forEach(ri => {
+      console.log(
+        `${ri.recipe.title} id: ${ri.recipe.id}`,
+        ' ' + ri.ingredient.name,
+      );
+    });
   };
 
   const onRecipeSelected = (recipe: Recipe) => {
@@ -69,9 +84,20 @@ const RecipesScreen = () => {
       });
   };
 
+  const deleteRecipe = async (recipe: Recipe) => {
+    const repository = AppDataSource.getRepository(Recipe);
+    repository
+      .remove(recipe)
+      .then(() => {
+        getRecipes();
+      })
+      .catch(e => {
+        console.log('delete recipe error', JSON.stringify(e));
+      });
+  };
+
   return (
     <View style={appStyles.container}>
-      <AddButton />
       <ScrollView style={appStyles.scrollContainer}>
         <TextInput
           onChangeText={onSearch}
@@ -86,7 +112,12 @@ const RecipesScreen = () => {
             onPress={() => onRecipeSelected(r)}>
             <Image style={styles.icon} source={recipeIcons[r.image]} />
             <View style={styles.textContainer}>
-              <Text style={appStyles.label}>{r.title}</Text>
+              <View style={styles.itemsContainer}>
+                <Text style={appStyles.label}>{r.title}</Text>
+                <TouchableOpacity onPress={() => deleteRecipe(r)}>
+                  <Text style={appStyles.smallText}>Eliminar</Text>
+                </TouchableOpacity>
+              </View>
               <Text style={appStyles.itemText}>
                 Tiempo de preparación: {r.preparationTime}min
               </Text>
@@ -102,6 +133,7 @@ const RecipesScreen = () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
+      <AddButton />
     </View>
   );
 };

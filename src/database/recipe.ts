@@ -24,6 +24,6 @@ export class Recipe {
   @Column()
   image: number;
 
-  @OneToMany(() => RecipeIngredient, rI => rI.recipe)
+  @OneToMany(() => RecipeIngredient, rI => rI.recipe, {cascade: true})
   ingredients: RecipeIngredient[];
 }
