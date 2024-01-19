@@ -51,7 +51,11 @@ const IngredientsScreen = () => {
     });
   }, []);
 
-  const addIngredient = async ({name, unit, amount}: IAddIngredientParams) => {
+  const createIngredient = async ({
+    name,
+    unit,
+    amount,
+  }: IAddIngredientParams) => {
     const repository = AppDataSource.getRepository(Ingredient);
     const nI = await repository.save({name, unit, amount});
     setIngredients([...ingredients, nI]);
@@ -115,7 +119,7 @@ const IngredientsScreen = () => {
               title="Agregar"
               onPress={() => {
                 if (newIngredient?.name && newIngredient?.unit && amount > 0) {
-                  addIngredient({
+                  createIngredient({
                     name: newIngredient.name,
                     unit: newIngredient.unit,
                     amount,

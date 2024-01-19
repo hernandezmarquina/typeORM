@@ -8,15 +8,14 @@ const App = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    AppDataSource.initialize()
-      .then(() => {
-        console.log('Data Source has been initialized!');
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error during Data Source initialization', err);
-      });
+    initDatabase();
   }, []);
+
+  const initDatabase = async () => {
+    AppDataSource.initialize().finally(() => {
+      setLoading(false);
+    });
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>

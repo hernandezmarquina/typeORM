@@ -11,10 +11,8 @@ const RecipeDetailsScreen = () => {
   const route = useRoute();
 
   useEffect(() => {
-    // Obtener el id de la receta de los parametros de la ruta
     const params = route.params;
     if (params && params.recipeId) {
-      // Obtener la receta por id
       const repository = AppDataSource.getRepository(Recipe);
       repository
         .find({

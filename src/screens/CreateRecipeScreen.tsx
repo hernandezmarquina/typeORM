@@ -45,16 +45,12 @@ const CreateRecipeScreen = () => {
     saveRecipeIngredients(newRecipe);
   };
 
-  const saveRecipeIngredients = async (recipe: Recipe) => {
-    const ingredientsToSave: RecipeIngredient[] = ingredients.map(i => {
-      const rI = new RecipeIngredient();
-      rI.ingredient = i.ingredient;
-      rI.amount = i.amount;
-      rI.recipe = recipe;
-      return rI;
-    });
-
-    await AppDataSource.getRepository(RecipeIngredient).save(ingredientsToSave);
+  const saveRecipeIngredients = async (r: Recipe) => {
+    const recipeIngredients: RecipeIngredient[] = ingredients.map(i => ({
+      ...i,
+      recipe: r,
+    }));
+    await AppDataSource.getRepository(RecipeIngredient).save(recipeIngredients);
     navigator.goBack();
   };
 

@@ -23,7 +23,6 @@ const RecipesScreen = () => {
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    // Obtenemos las recetas cada vez que la pantalla esta activa
     if (isFocused) {
       getRecipes();
     }
